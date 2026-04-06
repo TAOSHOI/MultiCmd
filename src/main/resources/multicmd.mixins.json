@@ -1,14 +1,13 @@
+// Файл: src/main/resources/multicmd.mixins.json
 {
 	"required": true,
+	"minVersion": "0.8",
 	"package": "com.multicmd.start.mixin",
 	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-		"ExampleMixin"
+	"client": [
+		"ChatScreenMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
-	},
-	"overwrites": {
-		"requireAnnotations": true
 	}
 }

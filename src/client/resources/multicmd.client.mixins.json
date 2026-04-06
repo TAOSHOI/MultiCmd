@@ -3,7 +3,7 @@
 	"package": "com.multicmd.start.client.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-		"ExampleClientMixin"
+      "ChatScreenMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
