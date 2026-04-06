@@ -1,3 +1,4 @@
+// Файл: settings.gradle
 pluginManagement {
 	repositories {
 		maven {
@@ -8,6 +9,4 @@ pluginManagement {
 		gradlePluginPortal()
 	}
 }
-
-// Should match your modid
-rootProject.name = 'multicmd'
+rootProject.name = 'MultiCmd'
