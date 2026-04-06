@@ -1,6 +1,6 @@
 // Файл: build.gradle
 plugins {
-	id 'fabric-loom' version '1.8-SNAPSHOT' // <-- ИСПРАВЛЕНО ЗДЕСЬ
+	id 'fabric-loom' version '1.8-SNAPSHOT'
 	id 'maven-publish'
 	id 'java'
 }
@@ -34,6 +34,18 @@ dependencies {
 	// Unit Тестирование (Изолированное)
 	testImplementation "org.junit.jupiter:junit-jupiter-api:5.10.0"
 	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.10.0"
+}
+
+// 🚀 ВОТ ТОТ САМЫЙ ФИКС! Указываем Gradle, где искать наш код
+sourceSets {
+	main {
+		java {
+			srcDirs = ['src/main/java', 'src/client/java']
+		}
+		resources {
+			srcDirs = ['src/main/resources', 'src/client/resources']
+		}
+	}
 }
 
 processResources {

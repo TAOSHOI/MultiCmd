@@ -10,6 +10,7 @@ import com.multicmd.start.client.parser.CommandParser;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -144,18 +145,69 @@ public class MultiCmdClient implements ClientModInitializer {
 		});
 	}
 
+	/**
+	 * Интерактивное, красивое меню помощи.
+	 * Содержит кликабельные элементы (Hover & Click Events).
+	 */
+	private void showHelp(FabricClientCommandSource source) {
+		// Создаем хелпер для интерактивного текста
+		java.util.function.Function<String, Text> clickableCmd = (cmd) -> Text.literal("§b" + cmd)
+				.styled(style -> style
+						.withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.SUGGEST_COMMAND, cmd))
+						.withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.literal("§eНажмите, чтобы вставить в чат")))
+				);
+
+		source.sendFeedback(Text.literal("§8§m                                        "));
+		source.sendFeedback(Text.literal("§6★ §lMultiCmd Enterprise §6★").formatted(Formatting.BOLD));
+		source.sendFeedback(Text.literal("§7Умный инструмент для пакетных команд."));
+		source.sendFeedback(Text.literal(""));
+
+		source.sendFeedback(Text.literal("§e§lСинтаксис Парсера:"));
+		source.sendFeedback(Text.literal(" §8▪ §fДиапазоны: ").append(clickableCmd.apply("/batch /say[1-5]")));
+		source.sendFeedback(Text.literal(" §8▪ §fСписки: ").append(clickableCmd.apply("/batch /heal {Steve,Alex}")));
+		source.sendFeedback(Text.literal(" §8▪ §fРандомизатор: ").append(clickableCmd.apply("/batch /give ?{Steve,Alex} apple")));
+		source.sendFeedback(Text.literal(" §8▪ §fПеременные: §a%me%§7, §a%x%§7, §a%y%§7, §a%z%"));
+		source.sendFeedback(Text.literal(""));
+
+		source.sendFeedback(Text.literal("§e§lУправление Данными:"));
+		source.sendFeedback(Text.literal(" §8▪ ").append(clickableCmd.apply("/group add MyTeam Steve,Alex")).append(Text.literal(" §7- Создать группу")));
+		source.sendFeedback(Text.literal(" §8▪ ").append(clickableCmd.apply("/batch /say @MyTeam")).append(Text.literal(" §7- Использовать группу")));
+		source.sendFeedback(Text.literal(" §8▪ ").append(clickableCmd.apply("/macro add home /tp %me% %x% %y% %z%")).append(Text.literal(" §7- Создать макрос")));
+		source.sendFeedback(Text.literal(" §8▪ ").append(clickableCmd.apply("/batch #home")).append(Text.literal(" §7- Выполнить макрос")));
+		source.sendFeedback(Text.literal(""));
+
+		source.sendFeedback(Text.literal("§c§lЭкстренное Управление:"));
+		source.sendFeedback(Text.literal(" §8▪ ").append(clickableCmd.apply("/multicmd cancel")).append(Text.literal(" §7- Остановить спам команд")));
+
+		source.sendFeedback(Text.literal("§8§m                                        "));
+		source.sendFeedback(Text.literal("§b💡 Подсказка: §7Нажмите клавишу §a[U] §7или букву §e[M] §7в чате для открытия меню."));
+	}
+
 	private void registerCommands() {
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
 
+			// --- ОСНОВНАЯ КОМАНДА: /batch ---
 			dispatcher.register(ClientCommandManager.literal("batch")
+					// Если введено только /batch - показываем помощь
+					.executes(context -> {
+						showHelp(context.getSource());
+						return 1;
+					})
 					.then(ClientCommandManager.argument("command", StringArgumentType.greedyString())
 							.executes(context -> {
-								executeBatchSafe(StringArgumentType.getString(context, "command"));
+								String cmd = StringArgumentType.getString(context, "command");
+								// Если введено /batch help - показываем помощь
+								if (cmd.trim().equalsIgnoreCase("help")) {
+									showHelp(context.getSource());
+								} else {
+									executeBatchSafe(cmd);
+								}
 								return 1;
 							})
 					)
 			);
 
+			// --- ОТМЕНА: /multicmd cancel ---
 			dispatcher.register(ClientCommandManager.literal("multicmd")
 					.then(ClientCommandManager.literal("cancel").executes(context -> {
 						BatchExecutor.getInstance().abort();
@@ -164,6 +216,7 @@ public class MultiCmdClient implements ClientModInitializer {
 					}))
 			);
 
+			// --- ГРУППЫ: /group ---
 			dispatcher.register(ClientCommandManager.literal("group")
 					.then(ClientCommandManager.literal("add").then(ClientCommandManager.argument("name", StringArgumentType.word()).then(ClientCommandManager.argument("members", StringArgumentType.greedyString()).executes(context -> {
 						String name = StringArgumentType.getString(context, "name");
@@ -181,6 +234,7 @@ public class MultiCmdClient implements ClientModInitializer {
 					}))
 			);
 
+			// --- МАКРОСЫ: /macro ---
 			dispatcher.register(ClientCommandManager.literal("macro")
 					.then(ClientCommandManager.literal("add").then(ClientCommandManager.argument("name", StringArgumentType.word()).then(ClientCommandManager.argument("cmd", StringArgumentType.greedyString()).executes(context -> {
 						String name = StringArgumentType.getString(context, "name");

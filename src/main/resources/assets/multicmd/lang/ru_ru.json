@@ -25,5 +25,19 @@
   "multicmd.gui.btn.stop": "АВАРИЙНАЯ ОСТАНОВКА",
   "multicmd.gui.btn.save_delay": "Применить",
   "multicmd.gui.hud": "Показывать HUD прогресс: %s",
-  "gui.done": "Закрыть"
+  "gui.done": "Закрыть",
+  "multicmd.help.title": "=== Помощь MultiCmd ===",
+  "multicmd.help.usage": "Использование: /batch <команда>",
+  "multicmd.help.syntax": "Синтаксис парсера:",
+  "multicmd.help.range": "[1-5] - Числовой диапазон (напр. /say [1-3])",
+  "multicmd.help.list": "{А,Б} - Список (напр. /heal {Стив,Алекс})",
+  "multicmd.help.random": "?{А,Б} - Случайный выбор одного из списка",
+  "multicmd.help.group": "@Группа - Использование группы (напр. @Builders)",
+  "multicmd.help.macro": "#Макрос - Выполнение макроса (напр. #claim)",
+  "multicmd.help.vars": "%me%, %x%, %y%, %z% - Переменные среды",
+  "multicmd.help.cmds": "Дополнительные команды:",
+  "multicmd.help.cancel": "/multicmd cancel - Экстренная остановка пула",
+  "multicmd.help.group_cmd": "/group [add|remove|list] - Управление группами",
+  "multicmd.help.macro_cmd": "/macro[add|remove|list] - Управление макросами",
+  "multicmd.help.gui": "💡 Нажмите клавишу U (или M в чате) для открытия GUI."
 }

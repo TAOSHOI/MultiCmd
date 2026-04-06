@@ -25,5 +25,19 @@
   "multicmd.gui.btn.stop": "EMERGENCY STOP",
   "multicmd.gui.btn.save_delay": "Apply",
   "multicmd.gui.hud": "Show HUD progress: %s",
-  "gui.done": "Close"
+  "gui.done": "Close",
+  "multicmd.help.title": "=== MultiCmd Help ===",
+  "multicmd.help.usage": "Usage: /batch <command>",
+  "multicmd.help.syntax": "Parser Syntax:",
+  "multicmd.help.range": "[1-5] - Numeric range (e.g. /say[1-3])",
+  "multicmd.help.list": "{A,B} - List (e.g. /heal {A,B})",
+  "multicmd.help.random": "?{A,B} - Random choice from list",
+  "multicmd.help.group": "@Group - Group injection (e.g. @Admins)",
+  "multicmd.help.macro": "#Macro - Execute macro (e.g. #claim)",
+  "multicmd.help.vars": "%me%, %x%, %y%, %z% - Environment Variables",
+  "multicmd.help.cmds": "Additional Commands:",
+  "multicmd.help.cancel": "/multicmd cancel - Emergency pool stop",
+  "multicmd.help.group_cmd": "/group [add|remove|list] - Manage groups",
+  "multicmd.help.macro_cmd": "/macro [add|remove|list] - Manage macros",
+  "multicmd.help.gui": "💡 Press U (or M in chat) to open the GUI."
 }

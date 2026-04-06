@@ -14,9 +14,6 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
-/**
- * Главный графический интерфейс управления модом.
- */
 public class MultiCmdScreen extends Screen {
 
     private final Screen parent;
@@ -127,17 +124,20 @@ public class MultiCmdScreen extends Screen {
         int centerX = this.width / 2;
         int centerY = this.height / 2;
 
-        context.drawCenteredTextWithShadow(this.textRenderer, this.title, centerX, 35, 0xFFFFFF);
+        // ФИКС БАГА 1: Используем яркий желтый цвет для заголовка
+        context.drawCenteredTextWithShadow(this.textRenderer, this.title, centerX, 35, 0xFFFF55);
 
         if (currentTab == 0) {
-            context.drawTextWithShadow(this.textRenderer, Text.translatable("multicmd.gui.label.enter_cmd"), centerX - 150, centerY - 35, 0xA0A0A0);
+            // ФИКС БАГА 1: Подняли текст на 5 пикселей выше и сделали белым (0xFFFFFF), чтобы он не сливался с полем
+            context.drawTextWithShadow(this.textRenderer, Text.translatable("multicmd.gui.label.enter_cmd"), centerX - 150, centerY - 32, 0xFFFFFF);
 
             if (BatchExecutor.getInstance().isActive()) {
                 String activeText = "Задач в пуле: " + BatchExecutor.getInstance().getRemaining();
                 context.drawCenteredTextWithShadow(this.textRenderer, Text.literal(activeText), centerX, centerY + 65, 0xFF5555);
             }
         } else if (currentTab == 1) {
-            context.drawTextWithShadow(this.textRenderer, Text.translatable("multicmd.gui.label.delay"), centerX - 150, centerY - 14, 0xA0A0A0);
+            // ФИКС БАГА 1: Белый текст для настроек
+            context.drawTextWithShadow(this.textRenderer, Text.translatable("multicmd.gui.label.delay"), centerX - 150, centerY - 14, 0xFFFFFF);
         }
 
         super.render(context, mouseX, mouseY, delta);

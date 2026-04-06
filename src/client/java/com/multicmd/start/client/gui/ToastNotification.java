@@ -4,18 +4,22 @@ package com.multicmd.start.client.gui;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 import java.util.List;
 
 /**
  * Кастомная реализация всплывающих уведомлений для улучшения User Experience (UX).
+ * Обновлено для Minecraft 1.21.1 (Система спрайтов).
  */
 public class ToastNotification implements Toast {
+
+    // В 1.21.1 текстуры запрашиваются через Identifier из папки спрайтов
+    private static final Identifier BACKGROUND_TEXTURE = Identifier.of("minecraft", "toast/system");
 
     private final Text title;
     private final Text description;
@@ -53,11 +57,15 @@ public class ToastNotification implements Toast {
             this.justUpdated = false;
         }
 
-        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, 0, 0, 0, 0, this.getWidth(), this.getHeight(), 256, 256);
+        // ИСПРАВЛЕНА ОТРИСОВКА: Используем новую систему drawGuiTexture для 1.21.1+
+        context.drawGuiTexture(BACKGROUND_TEXTURE, 0, 0, this.getWidth(), this.getHeight());
 
         TextRenderer textRenderer = manager.getClient().textRenderer;
+
+        // Отрисовка заголовка
         context.drawText(textRenderer, this.title, 30, 7, this.type.color, false);
 
+        // Отрисовка текста (с переносом строк)
         List<OrderedText> lines = textRenderer.wrapLines(this.description, 125);
         if (lines.size() == 1) {
             context.drawText(textRenderer, lines.get(0), 30, 18, 0xFFFFFF, false);

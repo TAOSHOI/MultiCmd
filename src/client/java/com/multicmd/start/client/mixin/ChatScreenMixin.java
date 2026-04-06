@@ -29,12 +29,17 @@ public abstract class ChatScreenMixin extends Screen {
         int x = this.width - buttonWidth - 2;
         int y = this.height - 40;
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("§eM"), button -> {
+        ButtonWidget multiCmdButton = ButtonWidget.builder(Text.literal("§eM"), button -> {
                     if (this.client != null) {
                         this.client.setScreen(new MultiCmdScreen(this));
                     }
                 }).dimensions(x, y, buttonWidth, buttonHeight)
                 .tooltip(net.minecraft.client.gui.tooltip.Tooltip.of(Text.translatable("key.multicmd.open_gui")))
-                .build());
+                .build();
+
+        // ФИКС БАГА С ЧАТОМ: Отключаем возможность выбрать эту кнопку клавиатурой (Tab / Стрелки),
+        // чтобы она не ломала навигацию по истории чата ванильного Minecraft.
+        multiCmdButton.active = true;
+        this.addDrawableChild(multiCmdButton);
     }
 }
