@@ -36,12 +36,12 @@ public class MultiCmdScreen extends Screen {
         int centerY = this.height / 2;
 
         this.addDrawableChild(ButtonWidget.builder(Text.translatable("multicmd.gui.tab.run"), button -> switchTab(0))
-                .dimensions(centerX - 105, 10, 100, 20)
+                .dimensions(centerX - 105, centerY - 60, 100, 20)
                 .tooltip(Tooltip.of(Text.literal("Открыть терминал исполнителя")))
                 .build());
 
         this.addDrawableChild(ButtonWidget.builder(Text.translatable("multicmd.gui.tab.settings"), button -> switchTab(1))
-                .dimensions(centerX + 5, 10, 100, 20)
+                .dimensions(centerX + 5, centerY - 60, 100, 20)
                 .tooltip(Tooltip.of(Text.literal("Конфигурация параметров мода")))
                 .build());
 
@@ -52,7 +52,7 @@ public class MultiCmdScreen extends Screen {
         }
 
         this.addDrawableChild(ButtonWidget.builder(Text.translatable("gui.done"), button -> this.close())
-                .dimensions(centerX - 100, this.height - 30, 200, 20).build());
+                .dimensions(centerX - 100, centerY + 70, 200, 20).build());
     }
 
     private void switchTab(int tabIndex) {
@@ -119,24 +119,35 @@ public class MultiCmdScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        // Стандартный блюр фона
         this.renderBackground(context, mouseX, mouseY, delta);
 
         int centerX = this.width / 2;
         int centerY = this.height / 2;
 
-        // ФИКС БАГА 1: Используем яркий желтый цвет для заголовка
-        context.drawCenteredTextWithShadow(this.textRenderer, this.title, centerX, 35, 0xFFFF55);
+        // ФИКС 2: Рисуем красивую черную полупрозрачную панель прямо под нашим интерфейсом!
+        // Это навсегда решит проблему "текста вне блюра".
+        int panelWidth = 340;
+        int panelHeight = 200;
+        int startX = centerX - (panelWidth / 2);
+        int startY = centerY - (panelHeight / 2) - 10;
+
+        // Рисуем фон: черный цвет с прозрачностью (0xA0000000)
+        context.fill(startX, startY, startX + panelWidth, startY + panelHeight, 0xA0000000);
+        // Рисуем обводку (серую)
+        context.drawBorder(startX, startY, panelWidth, panelHeight, 0xFF555555);
+
+        // Отрисовка текста внутри нашей панели
+        context.drawCenteredTextWithShadow(this.textRenderer, this.title, centerX, centerY - 90, 0xFFFF55);
 
         if (currentTab == 0) {
-            // ФИКС БАГА 1: Подняли текст на 5 пикселей выше и сделали белым (0xFFFFFF), чтобы он не сливался с полем
             context.drawTextWithShadow(this.textRenderer, Text.translatable("multicmd.gui.label.enter_cmd"), centerX - 150, centerY - 32, 0xFFFFFF);
 
             if (BatchExecutor.getInstance().isActive()) {
                 String activeText = "Задач в пуле: " + BatchExecutor.getInstance().getRemaining();
-                context.drawCenteredTextWithShadow(this.textRenderer, Text.literal(activeText), centerX, centerY + 65, 0xFF5555);
+                context.drawCenteredTextWithShadow(this.textRenderer, Text.literal(activeText), centerX, centerY + 58, 0xFF5555);
             }
         } else if (currentTab == 1) {
-            // ФИКС БАГА 1: Белый текст для настроек
             context.drawTextWithShadow(this.textRenderer, Text.translatable("multicmd.gui.label.delay"), centerX - 150, centerY - 14, 0xFFFFFF);
         }
 

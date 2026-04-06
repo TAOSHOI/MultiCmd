@@ -4,6 +4,7 @@ package com.multicmd.start.mixin;
 import com.multicmd.start.client.gui.MultiCmdScreen;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
@@ -11,14 +12,31 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * Внедрение кнопки быстрого доступа к MultiCmd прямо в ванильный экран чата.
- */
 @Mixin(ChatScreen.class)
 public abstract class ChatScreenMixin extends Screen {
 
     protected ChatScreenMixin(Text title) {
         super(title);
+    }
+
+    /**
+     * Статический внутренний класс кнопки, который специально "тупой"
+     * для системы навигации (игнорирует фокус).
+     */
+    private static class MultiCmdButton extends ButtonWidget {
+        public MultiCmdButton(int x, int y, int width, int height, Text message, PressAction onPress) {
+            super(x, y, width, height, message, onPress, DEFAULT_NARRATION_SUPPLIER);
+        }
+
+        @Override
+        public boolean isNarratable() {
+            return false;
+        }
+
+        @Override
+        public void setFocused(boolean focused) {
+            // Игнорируем попытки сфокусироваться через Tab или стрелки
+        }
     }
 
     @Inject(method = "init", at = @At("RETURN"))
@@ -29,17 +47,13 @@ public abstract class ChatScreenMixin extends Screen {
         int x = this.width - buttonWidth - 2;
         int y = this.height - 40;
 
-        ButtonWidget multiCmdButton = ButtonWidget.builder(Text.literal("§eM"), button -> {
-                    if (this.client != null) {
-                        this.client.setScreen(new MultiCmdScreen(this));
-                    }
-                }).dimensions(x, y, buttonWidth, buttonHeight)
-                .tooltip(net.minecraft.client.gui.tooltip.Tooltip.of(Text.translatable("key.multicmd.open_gui")))
-                .build();
+        MultiCmdButton multiCmdButton = new MultiCmdButton(x, y, buttonWidth, buttonHeight, Text.literal("§eM"), button -> {
+            if (this.client != null) {
+                this.client.setScreen(new MultiCmdScreen(this));
+            }
+        });
 
-        // ФИКС БАГА С ЧАТОМ: Отключаем возможность выбрать эту кнопку клавиатурой (Tab / Стрелки),
-        // чтобы она не ломала навигацию по истории чата ванильного Minecraft.
-        multiCmdButton.active = true;
+        multiCmdButton.setTooltip(Tooltip.of(Text.translatable("key.multicmd.open_gui")));
         this.addDrawableChild(multiCmdButton);
     }
 }
