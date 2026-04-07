@@ -8,7 +8,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Алгоритм обработки числовых диапазонов.
+ * Поддерживает как прямую[1-5], так и обратную [5-1] генерацию.
+ */
 public class NumericRangeRule implements ExpansionRule {
+    // Регулярное выражение с предкомпиляцией (оптимизация CPU)
     private static final Pattern PATTERN = Pattern.compile("\\[(-?\\d+)-(-?\\d+)\\]");
 
     @Override
@@ -25,16 +30,20 @@ public class NumericRangeRule implements ExpansionRule {
                 int end = Integer.parseInt(matcher.group(2));
                 int step = start <= end ? 1 : -1;
 
-                if (Math.abs(start - end) > 1000) {
-                    throw new CommandParser.ParserSecurityException("Диапазон чисел превышает безопасный предел в 1000 итераций.");
+                // Защита алгоритма от OutOfMemoryError (OOM)
+                if (Math.abs(start - end) > 2000) {
+                    throw new CommandParser.ParserSecurityException("Отказ в обслуживании: Числовой диапазон превышает безопасный предел (2000 итераций).");
                 }
 
+                String prefix = currentCmd.substring(0, matcher.start());
+                String suffix = currentCmd.substring(matcher.end());
+
                 for (int i = start; i != end + step; i += step) {
-                    String next = currentCmd.substring(0, matcher.start()) + i + currentCmd.substring(matcher.end());
-                    context.expandRecursive(next, results, depth + 1);
+                    // Используем конкатенацию для быстрой сборки дочерней ветви
+                    context.expandRecursive(prefix + i + suffix, results, depth + 1);
                 }
             } catch (NumberFormatException ex) {
-                throw new CommandParser.ParserSecurityException("Критическое переполнение числа в диапазоне.");
+                throw new CommandParser.ParserSecurityException("Критическое переполнение разрядности числа в диапазоне.");
             }
         }
     }

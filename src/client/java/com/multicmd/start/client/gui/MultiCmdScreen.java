@@ -14,6 +14,10 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
+/**
+ * Улучшенный графический интерфейс.
+ * Корректный Z-Index (Фон -> Виджеты -> Текст) и градиентный дизайн заголовка.
+ */
 public class MultiCmdScreen extends Screen {
 
     private final Screen parent;
@@ -36,12 +40,12 @@ public class MultiCmdScreen extends Screen {
         int centerY = this.height / 2;
 
         this.addDrawableChild(ButtonWidget.builder(Text.translatable("multicmd.gui.tab.run"), button -> switchTab(0))
-                .dimensions(centerX - 105, centerY - 60, 100, 20)
+                .dimensions(centerX - 105, 75, 100, 20)
                 .tooltip(Tooltip.of(Text.literal("Открыть терминал исполнителя")))
                 .build());
 
         this.addDrawableChild(ButtonWidget.builder(Text.translatable("multicmd.gui.tab.settings"), button -> switchTab(1))
-                .dimensions(centerX + 5, centerY - 60, 100, 20)
+                .dimensions(centerX + 5, 75, 100, 20)
                 .tooltip(Tooltip.of(Text.literal("Конфигурация параметров мода")))
                 .build());
 
@@ -52,7 +56,7 @@ public class MultiCmdScreen extends Screen {
         }
 
         this.addDrawableChild(ButtonWidget.builder(Text.translatable("gui.done"), button -> this.close())
-                .dimensions(centerX - 100, centerY + 70, 200, 20).build());
+                .dimensions(centerX - 100, this.height - 30, 200, 20).build());
     }
 
     private void switchTab(int tabIndex) {
@@ -64,9 +68,9 @@ public class MultiCmdScreen extends Screen {
     }
 
     private void initRunTab(int centerX, int centerY) {
-        this.batchInput = new TextFieldWidget(this.textRenderer, centerX - 150, centerY - 20, 300, 20, Text.literal(""));
+        this.batchInput = new TextFieldWidget(this.textRenderer, centerX - 150, centerY - 10, 300, 20, Text.literal(""));
         this.batchInput.setMaxLength(1024);
-        this.batchInput.setTooltip(Tooltip.of(Text.literal("Пример: /rg addmember Base_[1-10] @Builders")));
+        this.batchInput.setTooltip(Tooltip.of(Text.literal("Пример: /batch /rg addmember Base_[1-10] @Builders")));
         this.addDrawableChild(this.batchInput);
         this.setInitialFocus(this.batchInput);
 
@@ -76,20 +80,20 @@ public class MultiCmdScreen extends Screen {
                 this.close();
                 MultiCmdClient.getInstance().executeBatchSafe(cmd);
             }
-        }).dimensions(centerX - 100, centerY + 10, 200, 20).build());
+        }).dimensions(centerX - 100, centerY + 20, 200, 20).build());
 
         this.addDrawableChild(ButtonWidget.builder(Text.translatable("multicmd.gui.btn.stop"), button -> {
                     if (BatchExecutor.getInstance().isActive()) {
                         BatchExecutor.getInstance().abort();
                         ToastNotification.show(Text.literal("Пул остановлен"), Text.literal("Очередь была экстренно очищена."), ToastNotification.Type.WARNING);
                     }
-                }).dimensions(centerX - 100, centerY + 35, 200, 20)
+                }).dimensions(centerX - 100, centerY + 45, 200, 20)
                 .tooltip(Tooltip.of(Text.literal("Сбросить текущий активный пул команд")))
                 .build());
     }
 
     private void initSettingsTab(int centerX, int centerY) {
-        this.delayInput = new TextFieldWidget(this.textRenderer, centerX + 10, centerY - 20, 50, 20, Text.literal(""));
+        this.delayInput = new TextFieldWidget(this.textRenderer, centerX + 10, centerY - 10, 50, 20, Text.literal(""));
         this.delayInput.setMaxLength(4);
         this.delayInput.setText(String.valueOf(ConfigManager.delayTicks));
         this.delayInput.setTooltip(Tooltip.of(Text.literal("Задержка между пакетами. Рекомендуется: 10 тиков.")));
@@ -105,53 +109,50 @@ public class MultiCmdScreen extends Screen {
                 this.delayInput.setText(String.valueOf(ConfigManager.delayTicks));
                 ToastNotification.show(Text.literal("Ошибка Валидации"), Text.literal("Требуется целочисленное значение."), ToastNotification.Type.ERROR);
             }
-        }).dimensions(centerX + 65, centerY - 20, 80, 20).build());
+        }).dimensions(centerX + 65, centerY - 10, 80, 20).build());
 
-        Text hudText = Text.translatable("multicmd.gui.hud", ConfigManager.showHud ? "§aВКЛ" : "§cВЫКЛ");
+        Text hudText = Text.translatable("multicmd.gui.hud", ConfigManager.showHud ? "§aВКЛЮЧЕН" : "§cВЫКЛЮЧЕН");
         this.addDrawableChild(ButtonWidget.builder(hudText, button -> {
                     ConfigManager.showHud = !ConfigManager.showHud;
                     ConfigManager.saveConfig();
                     this.switchTab(1);
-                }).dimensions(centerX - 100, centerY + 10, 200, 20)
+                }).dimensions(centerX - 100, centerY + 20, 200, 20)
                 .tooltip(Tooltip.of(Text.literal("Отображение прогресс-бара поверх экрана")))
                 .build());
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        // Стандартный блюр фона
-        this.renderBackground(context, mouseX, mouseY, delta);
+        // Z-Index Слой 1: Фон (Блюр)
+        super.renderBackground(context, mouseX, mouseY, delta);
 
+        // Z-Index Слой 2: Виджеты (Кнопки и поля поверх блюра)
+        super.render(context, mouseX, mouseY, delta);
+
+        // Z-Index Слой 3: Тексты и Декорации (Самый верхний слой, поверх кнопок)
         int centerX = this.width / 2;
         int centerY = this.height / 2;
 
-        // ФИКС 2: Рисуем красивую черную полупрозрачную панель прямо под нашим интерфейсом!
-        // Это навсегда решит проблему "текста вне блюра".
-        int panelWidth = 340;
-        int panelHeight = 200;
-        int startX = centerX - (panelWidth / 2);
-        int startY = centerY - (panelHeight / 2) - 10;
+        context.fillGradient(0, 0, this.width, 60, 0xAA000000, 0x22000000);
+        context.fill(0, 60, this.width, 61, 0xAA55FF55);
 
-        // Рисуем фон: черный цвет с прозрачностью (0xA0000000)
-        context.fill(startX, startY, startX + panelWidth, startY + panelHeight, 0xA0000000);
-        // Рисуем обводку (серую)
-        context.drawBorder(startX, startY, panelWidth, panelHeight, 0xFF555555);
-
-        // Отрисовка текста внутри нашей панели
-        context.drawCenteredTextWithShadow(this.textRenderer, this.title, centerX, centerY - 90, 0xFFFF55);
+        context.drawCenteredTextWithShadow(this.textRenderer, this.title, centerX, 25, 0xFFFFFF);
 
         if (currentTab == 0) {
-            context.drawTextWithShadow(this.textRenderer, Text.translatable("multicmd.gui.label.enter_cmd"), centerX - 150, centerY - 32, 0xFFFFFF);
+            context.drawTextWithShadow(this.textRenderer, Text.translatable("multicmd.gui.label.enter_cmd"), centerX - 150, centerY - 25, 0xFFEAA7);
 
             if (BatchExecutor.getInstance().isActive()) {
-                String activeText = "Задач в пуле: " + BatchExecutor.getInstance().getRemaining();
-                context.drawCenteredTextWithShadow(this.textRenderer, Text.literal(activeText), centerX, centerY + 58, 0xFF5555);
+                long time = System.currentTimeMillis();
+                int alpha = (int) (100.0 * Math.sin(time / 200.0) + 155.0);
+                alpha = Math.max(50, Math.min(255, alpha));
+                int color = (alpha << 24) | 0xFF5555;
+
+                String activeText = "⚡ Активно задач в пуле: " + BatchExecutor.getInstance().getRemaining();
+                context.drawCenteredTextWithShadow(this.textRenderer, Text.literal(activeText), centerX, centerY + 70, color);
             }
         } else if (currentTab == 1) {
-            context.drawTextWithShadow(this.textRenderer, Text.translatable("multicmd.gui.label.delay"), centerX - 150, centerY - 14, 0xFFFFFF);
+            context.drawTextWithShadow(this.textRenderer, Text.translatable("multicmd.gui.label.delay"), centerX - 150, centerY - 4, 0xFFEAA7);
         }
-
-        super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
@@ -160,7 +161,6 @@ public class MultiCmdScreen extends Screen {
             this.close();
             return true;
         }
-
         if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
             if (currentTab == 0 && this.batchInput.isFocused()) {
                 String cmd = this.batchInput.getText();

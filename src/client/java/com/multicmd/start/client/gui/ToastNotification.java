@@ -13,12 +13,12 @@ import net.minecraft.util.Identifier;
 import java.util.List;
 
 /**
- * Кастомная реализация всплывающих уведомлений для улучшения User Experience (UX).
- * Обновлено для Minecraft 1.21.1 (Система спрайтов).
+ * Асинхронно-безопасная система нотификаций на экране.
+ * Обновлено для Minecraft 1.21.1 (Использование GUI Sprite Atlas).
  */
 public class ToastNotification implements Toast {
 
-    // В 1.21.1 текстуры запрашиваются через Identifier из папки спрайтов
+    // В 1.21.1 фоны берутся из атласа спрайтов по Identifier
     private static final Identifier BACKGROUND_TEXTURE = Identifier.of("minecraft", "toast/system");
 
     private final Text title;
@@ -45,8 +45,13 @@ public class ToastNotification implements Toast {
 
     public static void show(Text title, Text description, Type type) {
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client != null && client.getToastManager() != null) {
-            client.getToastManager().add(new ToastNotification(title, description, type));
+        // Рендер тостов должен происходить только в главном потоке игры (защита от краша при вызове из асинхронного Lua)
+        if (client != null) {
+            client.execute(() -> {
+                if (client.getToastManager() != null) {
+                    client.getToastManager().add(new ToastNotification(title, description, type));
+                }
+            });
         }
     }
 
@@ -57,7 +62,7 @@ public class ToastNotification implements Toast {
             this.justUpdated = false;
         }
 
-        // ИСПРАВЛЕНА ОТРИСОВКА: Используем новую систему drawGuiTexture для 1.21.1+
+        // ИСПРАВЛЕНО ДЛЯ 1.21.1: Используем drawGuiTexture вместо старого drawTexture
         context.drawGuiTexture(BACKGROUND_TEXTURE, 0, 0, this.getWidth(), this.getHeight());
 
         TextRenderer textRenderer = manager.getClient().textRenderer;
@@ -65,7 +70,7 @@ public class ToastNotification implements Toast {
         // Отрисовка заголовка
         context.drawText(textRenderer, this.title, 30, 7, this.type.color, false);
 
-        // Отрисовка текста (с переносом строк)
+        // Отрисовка описания с переносом строк
         List<OrderedText> lines = textRenderer.wrapLines(this.description, 125);
         if (lines.size() == 1) {
             context.drawText(textRenderer, lines.get(0), 30, 18, 0xFFFFFF, false);
@@ -75,6 +80,7 @@ public class ToastNotification implements Toast {
             }
         }
 
+        // Время жизни уведомления: 3500 миллисекунд (3.5 секунды)
         return startTime - this.startTime >= 3500L ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
     }
 }

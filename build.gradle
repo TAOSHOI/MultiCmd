@@ -31,6 +31,10 @@ dependencies {
 	// Интеграция с ModMenu
 	modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}")
 
+	// Движок Lua (Интегрируется прямо в Jar мода через include)
+	implementation "org.luaj:luaj-jse:3.0.1"
+	include "org.luaj:luaj-jse:3.0.1"
+
 	// Unit Тестирование (Изолированное)
 	testImplementation "org.junit.jupiter:junit-jupiter-api:5.10.0"
 	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.10.0"

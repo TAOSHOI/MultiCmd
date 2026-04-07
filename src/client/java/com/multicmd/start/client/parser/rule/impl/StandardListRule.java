@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Алгоритм полной распаковки списка.
+ * Пример: {Один, Два} -> Ветвь Один, Ветвь Два.
+ */
 public class StandardListRule implements ExpansionRule {
     private static final Pattern PATTERN = Pattern.compile("\\{([^}]+)\\}");
 
@@ -21,9 +25,11 @@ public class StandardListRule implements ExpansionRule {
         Matcher matcher = PATTERN.matcher(currentCmd);
         if (matcher.find()) {
             String[] items = matcher.group(1).split(",");
+            String prefix = currentCmd.substring(0, matcher.start());
+            String suffix = currentCmd.substring(matcher.end());
+
             for (String item : items) {
-                String next = currentCmd.substring(0, matcher.start()) + item.trim() + currentCmd.substring(matcher.end());
-                context.expandRecursive(next, results, depth + 1);
+                context.expandRecursive(prefix + item.trim() + suffix, results, depth + 1);
             }
         }
     }

@@ -1,9 +1,9 @@
 {
 	"required": true,
-	"package": "com.multicmd.start.client.mixin",
+	"package": "com.multicmd.start.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-      "ChatScreenMixin"
+      "ChatMessageMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

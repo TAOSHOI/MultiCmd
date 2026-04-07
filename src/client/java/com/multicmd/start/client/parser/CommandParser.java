@@ -2,6 +2,7 @@
 package com.multicmd.start.client.parser;
 
 import com.multicmd.start.client.parser.rule.ExpansionRule;
+import com.multicmd.start.client.parser.rule.impl.LetterRangeRule;
 import com.multicmd.start.client.parser.rule.impl.NumericRangeRule;
 import com.multicmd.start.client.parser.rule.impl.RandomListRule;
 import com.multicmd.start.client.parser.rule.impl.StandardListRule;
@@ -13,24 +14,26 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Ядро парсинга и лексического анализа синтаксиса.
- * Не содержит зависимостей от Minecraft, что делает его полностью покрываемым Unit-тестами.
+ * Ядро синтаксического анализа и генерации AST-эквивалента.
+ * Отвязано от потоков Minecraft для возможности параллельных вычислений.
  */
 public class CommandParser {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("MultiCmd-Engine");
+    private static final Logger LOGGER = LoggerFactory.getLogger("MultiCmd-Parser");
 
-    // Hard-Limits защиты движка от эксплоитов (Catastrophic Backtracking)
+    // Инженерные лимиты безопасности
     private static final int MAX_RECURSION_DEPTH = 15;
     private static final int MAX_STRING_LENGTH = 5000;
-    private static final int MAX_RESULTS_LIMIT = 1000;
+    private static final int MAX_RESULTS_LIMIT = 2500; // Повышено для мощных ПК
 
     private final List<ExpansionRule> rules;
 
     public CommandParser() {
         this.rules = new ArrayList<>();
+        // ПРИОРИТЕТ ВАЖЕН! Специфичные правила применяются первыми.
         this.rules.add(new RandomListRule());
         this.rules.add(new NumericRangeRule());
+        this.rules.add(new LetterRangeRule()); // Интегрировано новое буквенное правило
         this.rules.add(new StandardListRule());
     }
 
@@ -47,25 +50,25 @@ public class CommandParser {
         }
 
         if (rawCmd.length() > MAX_STRING_LENGTH) {
-            throw new ParserSecurityException("Размер строки команды превышает безопасный лимит памяти.");
+            throw new ParserSecurityException("Строка команды слишком велика. Сработала защита буфера.");
         }
 
-        // Разрешение Макросов
+        // 1. Препроцессинг: Алиасы макросов
         if (rawCmd.startsWith("#")) {
             String macroName = rawCmd.substring(1).trim();
             if (macros.containsKey(macroName)) {
                 rawCmd = macros.get(macroName);
             } else {
-                throw new IllegalArgumentException("Не удалось найти зарегистрированный макрос: #" + macroName);
+                throw new IllegalArgumentException("Ошибка компиляции: Макрос #" + macroName + " не зарегистрирован.");
             }
         }
 
-        // Инъекция переменных среды (%me%, %x%)
+        // 2. Препроцессинг: Переменные среды окружения
         for (Map.Entry<String, String> env : envVariables.entrySet()) {
             rawCmd = rawCmd.replace(env.getKey(), env.getValue());
         }
 
-        // Разрешение Групп (@Builders -> {Steve,Alex})
+        // 3. Препроцессинг: Распаковка ссылок на группы
         for (Map.Entry<String, String> group : groups.entrySet()) {
             String groupRef = "@" + group.getKey();
             if (rawCmd.contains(groupRef)) {
@@ -73,11 +76,13 @@ public class CommandParser {
             }
         }
 
+        // 4. Глубокий рекурсивный анализ
         List<String> results = new ArrayList<>();
         expandRecursive(rawCmd, results, 0);
 
         if (results.size() > MAX_RESULTS_LIMIT) {
-            throw new ParserSecurityException("Защита от взрыва комбинаторики: Пул команд > " + MAX_RESULTS_LIMIT);
+            throw new ParserSecurityException("Блокировка комбинаторного взрыва. Сгенерировано " + results.size() +
+                    " команд (Максимум: " + MAX_RESULTS_LIMIT + ").");
         }
 
         return results;
@@ -85,7 +90,7 @@ public class CommandParser {
 
     public void expandRecursive(String currentCmd, List<String> results, int depth) {
         if (depth > MAX_RECURSION_DEPTH) {
-            LOGGER.warn("Сработала защита StackOverflow Shield (Глубина: {}). Остановка ветви.", depth);
+            LOGGER.warn("Защита StackOverflow Shield (Уровень: {}). Ветвь обрезана.", depth);
             results.add(currentCmd);
             return;
         }
@@ -97,6 +102,7 @@ public class CommandParser {
             }
         }
 
+        // Атомарная ветвь достигнута
         results.add(currentCmd);
     }
 }
