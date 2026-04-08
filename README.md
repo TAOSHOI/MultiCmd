@@ -3,7 +3,7 @@
   <h1>🚀 MultiCmd (Fabric 1.21.+) v1.5.0</h1>
   <p><strong>The Ultimate Batch Command, Macro & Lua Bot-Framework</strong></p>
   
-  [![Fabric](https://img.shields.io/badge/Fabric-1.21.1-blue.svg)](https://fabricmc.net/)
+  [![Fabric](https://img.shields.io/badge/Fabric-1.21.+-blue.svg)](https://fabricmc.net/)
   [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 </div>
 
