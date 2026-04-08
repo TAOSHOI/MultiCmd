@@ -1,8 +1,8 @@
 {
 	"schemaVersion": 1,
-	"id": "multicmd",
+	"id": "multicmdlua",
 	"version": "${version}",
-	"name": "MultiCmd",
+	"name": "MultiCmdLua",
 	"description": "Профессиональный клиентский инструмент для пакетной обработки команд и Lua-скриптов.",
 	"authors": ["TAOSHOI"],
 	"contact": {

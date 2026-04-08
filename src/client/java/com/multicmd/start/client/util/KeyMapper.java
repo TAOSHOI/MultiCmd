@@ -7,8 +7,7 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 
 /**
- * Утилита для симуляции физического ввода игрока.
- * Обновлено для Minecraft 1.21.1: onKeyPressed требует InputUtil.Key вместо int.
+ * Потокобезопасная утилита для симуляции физического ввода игрока.
  */
 public class KeyMapper {
 
@@ -27,10 +26,7 @@ public class KeyMapper {
         client.execute(() -> {
             KeyBinding binding = getBinding(client, keyName.toLowerCase());
             if (binding != null) {
-                // Извлекаем привязанную клавишу через Accessor из Fabric API
                 InputUtil.Key boundKey = ((KeyBindingAccessor) binding).fabric_getBoundKey();
-
-                // В 1.21.1 метод onKeyPressed принимает сам объект Key, а не его числовой код
                 KeyBinding.onKeyPressed(boundKey);
             }
         });
