@@ -1,0 +1,67 @@
+{
+  "food":[
+    "apple", "beef", "porkchop", "bread", "carrot", "potato", "mutton", "chicken", 
+    "cookie", "melon_slice", "cod", "salmon", "stew", "kelp", "soup", "pie", 
+    "honey_bottle", "chorus_fruit", "rabbit", "beetroot", "cake", "pufferfish", 
+    "tropical_fish", "sweet_berries", "glow_berries"
+  ],
+  "ores":[
+    "ore", "raw_iron", "raw_gold", "raw_copper", "ancient_debris", "iron_ingot", 
+    "gold_ingot", "copper_ingot", "netherite_ingot", "diamond", "emerald", "lapis_lazuli", 
+    "coal", "amethyst_shard", "quartz", "iron_nugget", "gold_nugget", "netherite_scrap"
+  ],
+  "blocks_stone":[
+    "stone", "cobblestone", "andesite", "diorite", "granite", "tuff", "deepslate", 
+    "basalt", "blackstone", "netherrack", "end_stone", "purpur", "prismarine", 
+    "obsidian", "calcite", "bedrock", "sandstone", "brick", "terracotta", "concrete", "mud"
+  ],
+  "blocks_wood":[
+    "log", "planks", "wood", "stripped", "stairs", "slab", "fence", "gate", 
+    "door", "trapdoor", "bamboo_block"
+  ],
+  "blocks_nature":[
+    "dirt", "sand", "gravel", "grass_block", "leaves", "sapling", "flower", "rose", 
+    "tulip", "orchid", "daisy", "allium", "bluet", "mycelium", "podzol", "nylium", 
+    "vine", "lily_pad", "coral", "sponge", "fungus", "roots", "stem", "mushroom", 
+    "moss", "cactus", "sugar_cane", "pumpkin", "melon", "hay_block"
+  ],
+  "combat_weapons":[
+    "_sword", "bow", "arrow", "crossbow", "trident", "mace", "wind_charge", "snowball", "egg"
+  ],
+  "combat_armor":[
+    "helmet", "chestplate", "leggings", "boots", "shield", "horse_armor", "wolf_armor", 
+    "turtle_scute", "armadillo_scute"
+  ],
+  "tools":[
+    "pickaxe", "_axe", "_shovel", "_hoe", "fishing_rod", "shears", "flint_and_steel", 
+    "brush", "compass", "clock", "spyglass", "lead", "name_tag", "bucket"
+  ],
+  "mob_drops":[
+    "rotten_flesh", "bone", "gunpowder", "string", "spider_eye", "slime_ball", 
+    "blaze_rod", "ender_pearl", "ghast_tear", "magma_cream", "shulker_shell", 
+    "phantom_membrane", "dragon_breath", "ink_sac", "feather", "leather", 
+    "rabbit_hide", "rabbit_foot", "breeze_rod", "ominous_bottle"
+  ],
+  "redstone":[
+    "redstone", "repeater", "comparator", "piston", "observer", "hopper", "dropper", 
+    "dispenser", "tnt", "lever", "button", "pressure_plate", "tripwire", 
+    "daylight_detector", "sculk", "target", "crafter", "copper_bulb", "lightning_rod"
+  ],
+  "materials":[
+    "stick", "paper", "book", "clay", "nether_brick", "flint", "dye", "honeycomb", 
+    "resin", "wax", "glow_ink_sac", "echo_shard", "disc_fragment", "nautilus_shell", 
+    "prismarine_shard", "prismarine_crystals"
+  ],
+  "magic_and_valuables":[
+    "totem_of_undying", "enchanted_golden_apple", "golden_apple", "beacon", "conduit", 
+    "heart_of_the_sea", "nether_star", "elytra", "brewing_stand", "glistering_melon_slice", 
+    "golden_carrot", "potion", "glass_bottle", "enchanted_book", "experience_bottle", 
+    "dragon_egg", "music_disc", "smithing_template", "trial_key"
+  ],
+  "decorations":[
+    "painting", "item_frame", "armor_stand", "pot", "carpet", "banner", "bed", 
+    "torch", "lantern", "campfire", "candle", "chain", "sign", "skull", "head", 
+    "bell", "glass", "shulker_box", "barrel", "chest", "loom", "cartography_table", 
+    "fletching_table", "smithing_table", "grindstone", "anvil", "stonecutter"
+  ]
+}
